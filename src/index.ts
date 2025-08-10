@@ -2,6 +2,11 @@
 import express from 'express'
 import type {Request, Response} from 'express'
 import type {RequestWithBody, RequestWithParams, RequestWithQuery, RequestWithParamsBody} from '../src/types.ts'
+import type { CreateProductModel } from '../src/models/CreateProductModel.ts'
+import type { UpdateProductModel } from '../src/models/UpdateProductModel.ts'
+import type { URIParamsProductModel } from '../src/models/URIParamsProductModel.ts'
+import type { QueryProductsModel } from '../src/models/QueryProductModel.ts'
+import type { ProductsViewModel } from '../src/models/ProductsViewModel.ts'
 
 const app = express()
 const port = process.env.PORT || 3005
@@ -45,7 +50,7 @@ const db: {products: ProductType[]} = { products: [
   }
 ]}
 
-app.get('/products', (req: RequestWithQuery<{typeTech: string}>, res: Response<ProductType[]>) => {
+app.get('/products', (req: RequestWithQuery<QueryProductsModel>, res: Response<ProductsViewModel[]>) => {
  
   let findedProduct = db.products
   if(req.query.typeTech){
@@ -58,7 +63,7 @@ app.get('/products', (req: RequestWithQuery<{typeTech: string}>, res: Response<P
   }
   res.json(findedProduct)
 })
-app.get('/products/:id', (req: RequestWithParams<{id: string}>, res: Response<ProductType>) => {
+app.get('/products/:id', (req: RequestWithParams<URIParamsProductModel>, res: Response<ProductsViewModel>) => {
   const findedProduct = db.products.find(el => el.id === +req.params.id)
   if(!findedProduct){
     res.sendStatus(HTTP_STATUSES.BADREQ_400)
@@ -68,7 +73,7 @@ app.get('/products/:id', (req: RequestWithParams<{id: string}>, res: Response<Pr
   res.json(findedProduct)
 })
 
-app.post('/products', (req: RequestWithBody<{typeTech: string, model: string}>, res: Response<ProductType>) => {
+app.post('/products', (req: RequestWithBody<CreateProductModel>, res: Response<ProductsViewModel>) => {
   const createdProduct = {
     id: +newID(),
     typeTech: req.body.typeTech, 
@@ -87,7 +92,7 @@ app.post('/products', (req: RequestWithBody<{typeTech: string, model: string}>, 
     res.send(createdProduct)
 })
 
-app.put('/products/:id', (req: RequestWithParamsBody<{id: string},{ typeTech: string, model: string}> , res: Response<ProductType[]>) => {
+app.put('/products/:id', (req: RequestWithParamsBody<URIParamsProductModel, UpdateProductModel> , res: Response<ProductsViewModel[]>) => {
   let products = db.products
   products = products.filter(el => el.id == +req.params.id ? el.model=req.body.model : el)
   if(!req.body.model){
@@ -98,7 +103,7 @@ app.put('/products/:id', (req: RequestWithParamsBody<{id: string},{ typeTech: st
   res.send(products)
 })
 
-app.delete('/products/:id', (req: RequestWithParams<{id: string}>, res: Response<ProductType[]>)=>{
+app.delete('/products/:id', (req: RequestWithParams<URIParamsProductModel>, res: Response<ProductsViewModel[]>)=>{
   let products = db.products
     products=products.filter(el => el.id !== +req.params.id)
   res.send(products)
