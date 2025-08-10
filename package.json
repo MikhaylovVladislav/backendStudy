@@ -7,7 +7,9 @@
   "type": "module",
   "scripts": {
     "watchTSC": "tsc -w",
-    "devJS": "nodemon --inspect .\\dist\\index.js"
+    "devJS": "nodemon --inspect .\\dist\\index.js",
+    "build": "tsc",
+    "start": "node .\\dist\\index.js"
   },
   "dependencies": {
     "express": "^5.1.0"
