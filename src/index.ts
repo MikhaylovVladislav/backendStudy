@@ -1,5 +1,8 @@
 //const express = require('express')
 import express from 'express'
+import type {Request, Response} from 'express'
+import type {RequestWithBody, RequestWithParams, RequestWithQuery, RequestWithParamsBody} from '../src/types.ts'
+
 const app = express()
 const port = process.env.PORT || 3005
 const jsonBodyMeddleWare = express.json()  // req.body
@@ -21,7 +24,13 @@ const newID = () => {
   return new Date()
 }
 
-const db = { products: [
+type ProductType = {
+  id: number,
+  typeTech: string,
+  model: string
+}
+
+const db: {products: ProductType[]} = { products: [
   {
     id: 1, typeTech: "phone", model: "rion 9 pro" 
   },
@@ -36,42 +45,30 @@ const db = { products: [
   }
 ]}
 
-app.get('/', (req, res) => {
-  res.send('Hello World Backend hhaha!')
-})
-app.get('/town', (req, res) => {
-  res.send('Hello Ufa!')
-})
-app.get('/country', (req, res) => {
-  res.send('Hello Russia!')
-})
-
-app.get('/products', (req, res) => {
+app.get('/products', (req: RequestWithQuery<{typeTech: string}>, res: Response<ProductType[]>) => {
  
   let findedProduct = db.products
   if(req.query.typeTech){
      findedProduct = findedProduct
      .filter(el => el.typeTech.indexOf(req.query.typeTech as string)>-1)
-     res.sendStatus(HTTP_STATUSES.OK_200)
+     //res.sendStatus(HTTP_STATUSES.OK_200)
      
   }else{
-    res.sendStatus(HTTP_STATUSES.BADREQ_400)
-    return;
+    
   }
   res.json(findedProduct)
 })
-app.get('/products/:id', (req, res) => {
+app.get('/products/:id', (req: RequestWithParams<{id: string}>, res: Response<ProductType>) => {
   const findedProduct = db.products.find(el => el.id === +req.params.id)
   if(!findedProduct){
     res.sendStatus(HTTP_STATUSES.BADREQ_400)
     return;
   }
-  res.sendStatus(HTTP_STATUSES.OK_200)
+  //res.sendStatus(HTTP_STATUSES.OK_200)
   res.json(findedProduct)
 })
 
-app.post('/products', (req, res) => {
-  //products.push({id: newID(), typeTech: req.body.typeTech, model: req.body.model})
+app.post('/products', (req: RequestWithBody<{typeTech: string, model: string}>, res: Response<ProductType>) => {
   const createdProduct = {
     id: +newID(),
     typeTech: req.body.typeTech, 
@@ -86,25 +83,22 @@ app.post('/products', (req, res) => {
      return;
   }
     db.products.push(createdProduct)
-    res.sendStatus(HTTP_STATUSES.CREATED_201)
+    //res.sendStatus(HTTP_STATUSES.CREATED_201)
     res.send(createdProduct)
 })
 
-app.put('/products/:id', (req, res) => {
-
+app.put('/products/:id', (req: RequestWithParamsBody<{id: string},{ typeTech: string, model: string}> , res: Response<ProductType[]>) => {
   let products = db.products
   products = products.filter(el => el.id == +req.params.id ? el.model=req.body.model : el)
   if(!req.body.model){
     res.sendStatus(HTTP_STATUSES.BADREQ_400)
     return;
   }
-
-  res.sendStatus(HTTP_STATUSES.CREATED_201)
+  //res.sendStatus(HTTP_STATUSES.CREATED_201)
   res.send(products)
 })
 
-app.delete('/products/:id', (req, res)=>{
-  
+app.delete('/products/:id', (req: RequestWithParams<{id: string}>, res: Response<ProductType[]>)=>{
   let products = db.products
     products=products.filter(el => el.id !== +req.params.id)
   res.send(products)
