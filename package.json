@@ -1,0 +1,22 @@
+{
+  "name": "itIncub",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "mva",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "watchTSC": "tsc -w",
+    "devJS": "nodemon --inspect .\\dist\\index.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.2.1",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
