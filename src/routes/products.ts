@@ -7,7 +7,7 @@ import type { URIParamsProductModel } from '../models/URIParamsProductModel.ts'
 import type { QueryProductsModel } from '../models/QueryProductModel.ts'
 import type { ProductsViewModel } from "../models/ProductsViewModel.ts"
 import { HTTP_STATUSES } from "../utils"
-import { getProductsWithQuery, getProductsById, createProduct, updateProduct, deleteProduct } from "../repositories/products-repositories.js"
+import { productRepository } from "../repositories/products-repositories"
 
 export const getProductsRoutes = ()=>{
     const routerProduct = express.Router({ mergeParams: true })
@@ -19,24 +19,24 @@ export const getProductsRoutes = ()=>{
 routerProduct.use(timeLog)
 
 routerProduct.get('/', (req: RequestWithQuery<QueryProductsModel>, res: Response<ProductsViewModel[]>) => {
-    res.json(getProductsWithQuery(req.query.typeTech))
+    res.json(productRepository.getProductsWithQuery(req.query.typeTech))
 })
 
 routerProduct.get('/:id', (req: RequestWithParams<URIParamsProductModel>, res: Response<ProductsViewModel>) => {
-    res.json(getProductsById(+req.params.id))
+    res.json(productRepository.getProductsById(+req.params.id))
 })
 
 routerProduct.post('/', (req: RequestWithBody<CreateProductModel>, res: Response<ProductsViewModel>) => {
-    res.json(createProduct(req.body.typeTech, req.body.model))
+    res.json(productRepository.createProduct(req.body.typeTech, req.body.model))
 
 })
 
 routerProduct.put('/:id', (req: RequestWithParamsBody<URIParamsProductModel, UpdateProductModel> , res: Response) => { //Response<ProductsViewModel[]>
-    res.send(updateProduct(+req.params.id, req.body.typeTech, req.body.model))
+    res.send(productRepository.updateProduct(+req.params.id, req.body.typeTech, req.body.model))
 })
 
 routerProduct.delete('/:id', (req: RequestWithParams<URIParamsProductModel>, res: Response)=>{
-   res.json(deleteProduct(+req.params.id))
+   res.json(productRepository.deleteProduct(+req.params.id))
 })
  return routerProduct;
 }
