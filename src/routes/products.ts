@@ -6,76 +6,37 @@ import type { UpdateProductModel } from '../models/UpdateProductModel.ts'
 import type { URIParamsProductModel } from '../models/URIParamsProductModel.ts'
 import type { QueryProductsModel } from '../models/QueryProductModel.ts'
 import type { ProductsViewModel } from "../models/ProductsViewModel.ts"
-import type { ProductType }  from '../database/db.ts'
 import { HTTP_STATUSES } from "../utils"
+import { getProductsWithQuery, getProductsById, createProduct, updateProduct, deleteProduct } from "../repositories/products-repositories.js"
 
-const newID = () => {
-  return new Date()
-}
-
-export const getProductsRoutes = (db: {products: ProductType[]})=>{
+export const getProductsRoutes = ()=>{
     const routerProduct = express.Router({ mergeParams: true })
     const timeLog = (req:Request, res: Response, next: any) => {
         console.log('Time: ', Date.now())
         next()
     }
 
-    routerProduct.use(timeLog)
+routerProduct.use(timeLog)
 
-    routerProduct.get('/', (req: RequestWithQuery<QueryProductsModel>, res: Response<ProductsViewModel[]>) => {
-        let findedProduct = db.products
-        if(req.query.typeTech){
-        findedProduct = findedProduct
-            .filter(el => el.typeTech.indexOf(req.query.typeTech as string)>-1)
-        //res.sendStatus(HTTP_STATUSES.OK_200)
-        }
-    res.json(findedProduct)
+routerProduct.get('/', (req: RequestWithQuery<QueryProductsModel>, res: Response<ProductsViewModel[]>) => {
+    res.json(getProductsWithQuery(req.query.typeTech))
 })
 
 routerProduct.get('/:id', (req: RequestWithParams<URIParamsProductModel>, res: Response<ProductsViewModel>) => {
-    const findedProduct = db.products.find(el => el.id === +req.params.id)
-    if(!findedProduct){
-        res.sendStatus(HTTP_STATUSES.BADREQ_400)
-        return;
-    }
-    //res.sendStatus(HTTP_STATUSES.OK_200)
-    res.json(findedProduct)
+    res.json(getProductsById(+req.params.id))
 })
 
 routerProduct.post('/', (req: RequestWithBody<CreateProductModel>, res: Response<ProductsViewModel>) => {
-    const createdProduct = {
-        id: +newID(),
-        typeTech: req.body.typeTech, 
-        model: req.body.model
-    }
-    if(!req.body.typeTech){
-        res.sendStatus(HTTP_STATUSES.BADREQ_400)
-        return;
-    }
-    if(!req.body.model){
-        res.sendStatus(HTTP_STATUSES.BADREQ_400)
-        return;
-    }
-    db.products.push(createdProduct)
-    //res.sendStatus(HTTP_STATUSES.CREATED_201)
-    res.send(createdProduct)
+    res.json(createProduct(req.body.typeTech, req.body.model))
+
 })
 
-routerProduct.put('/:id', (req: RequestWithParamsBody<URIParamsProductModel, UpdateProductModel> , res: Response<ProductsViewModel[]>) => {
-    let products = db.products
-    products = products.filter(el => el.id == +req.params.id ? el.model=req.body.model : el)
-    if(!req.body.model){
-        res.sendStatus(HTTP_STATUSES.BADREQ_400)
-        return;
-    }
-    //res.sendStatus(HTTP_STATUSES.CREATED_201)
-    res.send(products)
+routerProduct.put('/:id', (req: RequestWithParamsBody<URIParamsProductModel, UpdateProductModel> , res: Response) => { //Response<ProductsViewModel[]>
+    res.send(updateProduct(+req.params.id, req.body.typeTech, req.body.model))
 })
 
-routerProduct.delete('/:id', (req: RequestWithParams<URIParamsProductModel>, res: Response<ProductsViewModel[]>)=>{
-    let products = db.products
-    products=products.filter(el => el.id !== +req.params.id)
-    res.send(products)
+routerProduct.delete('/:id', (req: RequestWithParams<URIParamsProductModel>, res: Response)=>{
+   res.json(deleteProduct(+req.params.id))
 })
  return routerProduct;
 }
