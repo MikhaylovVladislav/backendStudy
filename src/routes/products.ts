@@ -22,28 +22,48 @@ export const getProductsRoutes = ()=>{
 
 routerProduct.use(timeLog)
 
-routerProduct.get('/', (req: RequestWithQuery<QueryProductsModel>, res: Response<ProductsViewModel[]>) => {
-    res.json(productRepository.getProductsWithQuery(req.query.typeTech))
+routerProduct.get('/', async(req: RequestWithQuery<QueryProductsModel>, res: Response<ProductsViewModel[]>) => {
+    const findedProducts = await productRepository.getProductsWithQuery(req.query.typeTech)
+    if (!findedProducts) {
+        return res.status(HTTP_STATUSES.NOTFOUND_404).send()
+    }
+    res.json(findedProducts)
 })
 
-routerProduct.get('/:id', (req: RequestWithParams<URIParamsProductModel>, res: Response<ProductsViewModel>) => {
-    res.json(productRepository.getProductsById(+req.params.id))
+routerProduct.get('/:id', async(req: RequestWithParams<URIParamsProductModel>, res: Response<ProductsViewModel>) => {
+    const findedProduct = await productRepository.getProductsById(+req.params.id)
+    if (!findedProduct) {
+        return res.status(HTTP_STATUSES.NOTFOUND_404).send()
+    }
+    res.json(findedProduct)
 })
 
 routerProduct.post('/', 
     typeTechValidation,
     inputValidateMiddleware, 
-    (req: RequestWithBody<CreateProductModel>, res: Response<ProductsViewModel>) => {
-    res.json(productRepository.createProduct(req.body.typeTech, req.body.model))
+    async(req: RequestWithBody<CreateProductModel>, res: Response<ProductsViewModel>) => {
+    const createdProduct = await productRepository.createProduct(req.body.typeTech, req.body.model)
+    if(!createdProduct){
+        res.status(HTTP_STATUSES.BADREQ_400).send()
+    }
+    res.status(HTTP_STATUSES.CREATED_201).send()
 
 })
 
-routerProduct.put('/:id', (req: RequestWithParamsBody<URIParamsProductModel, UpdateProductModel> , res: Response) => { //Response<ProductsViewModel[]>
-    res.send(productRepository.updateProduct(+req.params.id, req.body.typeTech, req.body.model))
+routerProduct.put('/:id', async(req: RequestWithParamsBody<URIParamsProductModel, UpdateProductModel> , res: Response) => { //Response<ProductsViewModel[]>
+    const updatedProduct =  await productRepository.updateProduct(+req.params.id, req.body.typeTech, req.body.model)
+    if(!updatedProduct){
+        res.status(HTTP_STATUSES.BADREQ_400).send()
+    }
+    res.status(HTTP_STATUSES.NONCONTENT_204).send()
 })
 
-routerProduct.delete('/:id', (req: RequestWithParams<URIParamsProductModel>, res: Response)=>{
-   res.json(productRepository.deleteProduct(+req.params.id))
+routerProduct.delete('/:id', async(req: RequestWithParams<URIParamsProductModel>, res: Response)=>{
+    const deletedProduct = await productRepository.deleteProduct(+req.params.id)
+    if(!deletedProduct){
+        res.status(HTTP_STATUSES.BADREQ_400).send()
+    }
+    res.status(HTTP_STATUSES.NONCONTENT_204).send()
 })
  return routerProduct;
 }

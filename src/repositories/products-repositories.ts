@@ -29,7 +29,7 @@ interface Product {
 ]}
 
 export const productRepository = {
-    getProductsWithQuery(typeTech?: string) {
+    async getProductsWithQuery(typeTech?: string): Promise<ProductType[]> {
         let products = db.products
         if(typeTech){
             products = products.filter(el => el.typeTech.includes(typeTech))
@@ -37,14 +37,14 @@ export const productRepository = {
         return products
     },
 
-    getProductsById(id: number) {
+    async getProductsById(id: number): Promise<ProductType|undefined> {
         const findedProduct = db.products.find(el => el.id === id)
         if(findedProduct){
             return findedProduct
         } 
     },
 
-    createProduct( typeTech: string, model: string) {
+    async createProduct( typeTech: string, model: string): Promise<ProductType> {
         const createdProduct = {
             id: +Date.now(),
             typeTech: typeTech, 
@@ -54,25 +54,18 @@ export const productRepository = {
         return createdProduct
     },
 
-    updateProduct(id: number, typeTech: string , model: string) {
-        db.products.find(el => {
-            el.id === id
-            if(el){
-                if(typeTech){
-                el.typeTech = typeTech
-                }
-                if(model){
-                    el.model = model
-                }
-                return true
-            }
-        return false
-        }
-        )   
+    async updateProduct(id: number, typeTech: string , model: string): Promise<boolean> {
+        const product = db.products.find(el => el.id === id)
+        if (!product) return false
+        
+        if (typeTech) product.typeTech = typeTech
+        if (model) product.model = model
+        return true
     },
 
-    deleteProduct(id: number) {
+    async deleteProduct(id: number): Promise<boolean> {
+        const initialLength = db.products.length
         db.products = db.products.filter(el => el.id !== id)
-        return db.products
+        return db.products.length < initialLength
     }
 }
