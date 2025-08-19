@@ -27,7 +27,7 @@ routerProduct.get('/', async(req: RequestWithQuery<QueryProductsModel>, res: Res
     if (!findedProducts) {
         return res.status(HTTP_STATUSES.NOTFOUND_404).send()
     }
-    res.json(findedProducts)
+    res.status(HTTP_STATUSES.OK_200).json(findedProducts)
 })
 
 routerProduct.get('/:id', async(req: RequestWithParams<URIParamsProductModel>, res: Response<ProductsViewModel>) => {
@@ -35,7 +35,7 @@ routerProduct.get('/:id', async(req: RequestWithParams<URIParamsProductModel>, r
     if (!findedProduct) {
         return res.status(HTTP_STATUSES.NOTFOUND_404).send()
     }
-    res.json(findedProduct)
+    res.status(HTTP_STATUSES.OK_200).json(findedProduct)
 })
 
 routerProduct.post('/', 
